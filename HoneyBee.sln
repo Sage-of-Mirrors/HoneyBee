@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoneyBee", "HoneyBee\HoneyBee.csproj", "{F9068D7E-2F0F-4F5F-A49E-20E0C1149F0B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HouseCat", "HouseCat\HouseCat.csproj", "{1A8DCF4B-6CC6-4664-AEBC-038C05FE2773}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F9068D7E-2F0F-4F5F-A49E-20E0C1149F0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9068D7E-2F0F-4F5F-A49E-20E0C1149F0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9068D7E-2F0F-4F5F-A49E-20E0C1149F0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9068D7E-2F0F-4F5F-A49E-20E0C1149F0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A8DCF4B-6CC6-4664-AEBC-038C05FE2773}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A8DCF4B-6CC6-4664-AEBC-038C05FE2773}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A8DCF4B-6CC6-4664-AEBC-038C05FE2773}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A8DCF4B-6CC6-4664-AEBC-038C05FE2773}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {47EACAA2-824B-43B2-8C31-76A0895D4893}
+	EndGlobalSection
+EndGlobal
