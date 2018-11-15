@@ -7,18 +7,18 @@ using System.IO;
 using System.IO.Compression;
 using GameFormatReader.Common;
 
-namespace HoneyBee
+namespace HoneyBee.Archive
 {
     public class File
     {
         public int Size;
-        public int Flags;
+        public CompressionType Compression;
 
         public byte[] Data;
 
         public override string ToString()
         {
-            return $"{ Flags }";
+            return $"{ Compression }";
         }
     }
 
@@ -65,53 +65,16 @@ namespace HoneyBee
                     File file = new File();
 
                     file.Size = reader.ReadInt32();
-                    file.Flags = reader.ReadInt32();
+                    file.Compression = (CompressionType)reader.ReadInt32();
                     file.Data = reader.ReadBytes(compressed_size);
 
                     m_Files.Add(file);
                 }
             }
 
-            for (int i = 0; i < m_Files.Count; i++)
+            foreach (File f in m_Files)
             {
-                File f = m_Files[i];
-
-                if ((f.Flags & 6) == 6)
-                {
-                    byte[] buffer = new byte[4096];
-                    long idk = 0;
-
-                    using (MemoryStream testaaaa = new MemoryStream(f.Data))
-                    {
-                        testaaaa.ReadByte();
-                        testaaaa.ReadByte();
-                        testaaaa.ReadByte();
-                        testaaaa.ReadByte();
-
-                        testaaaa.ReadByte();
-                        testaaaa.ReadByte();
-                        testaaaa.ReadByte();
-                        testaaaa.ReadByte();
-
-                        testaaaa.ReadByte();
-                        testaaaa.ReadByte();
-
-                        using (MemoryStream test = new MemoryStream(new byte[f.Size]))
-                        using (DeflateStream def = new DeflateStream(testaaaa, CompressionMode.Decompress, true))
-                        {
-                            def.CopyTo(test);
-                            f.Data = test.ToArray();
-                        }
-                    }
-                }
-                else if (f.Flags == 4)
-                {
-
-                }
-                else
-                {
-                    f.Data = Type1Compression.Decompress(f.Data, f.Size);
-                }
+                Compression.Decompress(f);
             }
         }
 

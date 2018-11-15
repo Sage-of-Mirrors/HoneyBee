@@ -178,7 +178,7 @@ namespace HoneyBee.model
 
                     List<MeshVertexIndex> vert_indices = new List<MeshVertexIndex>();
 
-                    for (int a = 0; a < 4; a++)
+                    for (int a = 0; a < 3; a++)
                     {
                         MeshVertexIndex index = new MeshVertexIndex();
 
@@ -190,10 +190,50 @@ namespace HoneyBee.model
                         vert_indices.Add(index);
                     }
 
-                    mesh.Vertices.AddRange(new MeshVertexIndex[] { vert_indices[0], vert_indices[1], vert_indices[2] });
+                    // quad
+                    if (unk_1 == 3)
+                    {
+                        MeshVertexIndex index = new MeshVertexIndex();
 
-                    if (unk_1 != 2)
+                        index.Position = reader.ReadInt16();
+                        index.Normal = reader.ReadInt16();
+                        index.Color0 = reader.ReadInt16();
+                        index.Tex0 = reader.ReadInt16();
+
+                        vert_indices.Add(index);
+
+                        mesh.Vertices.AddRange(new MeshVertexIndex[] { vert_indices[0], vert_indices[1], vert_indices[2] });
                         mesh.Vertices.AddRange(new MeshVertexIndex[] { vert_indices[1], vert_indices[3], vert_indices[2] });
+                    }
+                    else if (unk_1 == 2)
+                    {
+                        mesh.Vertices.AddRange(new MeshVertexIndex[] { vert_indices[0], vert_indices[1], vert_indices[2] });
+
+                        reader.SkipInt32();
+                        reader.SkipInt32();
+                    }
+
+                    // tristrip
+                    else if (unk_1 == 4)
+                    {
+                        int tri_count = reader.ReadInt32();
+                        int unk_value = reader.ReadInt32();
+
+                        List<MeshVertexIndex> strip = new List<MeshVertexIndex>();
+
+                        strip.AddRange(new MeshVertexIndex[] { vert_indices[0], vert_indices[1], vert_indices[2] });
+
+                        for (int t = 0; t < tri_count - 1; t++)
+                        {
+                            MeshVertexIndex orig = strip[strip.Count - 2];
+                            MeshVertexIndex new_vert = new MeshVertexIndex();
+                            new_vert.Position = orig.Position + 3;
+
+                            strip.Add(new_vert);
+                        }
+
+                        //mesh.Vertices.AddRange(ConvertTopologyToTriangles(4, strip).ToArray());
+                    }
 
                     Vector3 unk_3 = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
                 }
@@ -202,6 +242,61 @@ namespace HoneyBee.model
             }
 
             reader.BaseStream.Seek(8, SeekOrigin.Begin);
+        }
+
+        private List<MeshVertexIndex> ConvertTopologyToTriangles(int fromType, List<MeshVertexIndex> indexes)
+        {
+            List<MeshVertexIndex> sortedIndexes = new List<MeshVertexIndex>();
+            if (fromType == 4)
+            {
+                for (int v = 2; v < indexes.Count; v++)
+                {
+                    bool isEven = v % 2 != 0;
+                    MeshVertexIndex[] newTri = new MeshVertexIndex[3];
+
+                    newTri[0] = indexes[v - 2];
+                    newTri[1] = isEven ? indexes[v] : indexes[v - 1];
+                    newTri[2] = isEven ? indexes[v - 1] : indexes[v];
+
+                    // Check against degenerate triangles (a triangle which shares indexes)
+                    if (newTri[0] != newTri[1] && newTri[1] != newTri[2] && newTri[2] != newTri[0])
+                        sortedIndexes.AddRange(newTri);
+                    else
+                        System.Console.WriteLine("Degenerate triangle detected, skipping TriangleStrip conversion to triangle.");
+                }
+            }
+            else if (fromType == 1)
+            {
+                for (int v = 1; v < indexes.Count - 1; v++)
+                {
+                    // Triangle is always, v, v+1, and index[0]?
+                    MeshVertexIndex[] newTri = new MeshVertexIndex[3];
+                    newTri[0] = indexes[v];
+                    newTri[1] = indexes[v + 1];
+                    newTri[2] = indexes[0];
+
+                    // Check against degenerate triangles (a triangle which shares indexes)
+                    if (newTri[0] != newTri[1] && newTri[1] != newTri[2] && newTri[2] != newTri[0])
+                        sortedIndexes.AddRange(newTri);
+                    else
+                        System.Console.WriteLine("Degenerate triangle detected, skipping TriangleFan conversion to triangle.");
+                }
+            }
+            else if (fromType == 2)
+            {
+                // The good news is, Triangles just go straight though!
+                sortedIndexes.AddRange(indexes);
+            }
+            else if (fromType == 3)
+            {
+
+            }
+            else
+            {
+                System.Console.WriteLine("Unsupported GXPrimitiveType: {0} in conversion to Triangle List.", fromType);
+            }
+
+            return sortedIndexes;
         }
 
         public void DumpToOBJ(string file_name)
@@ -233,7 +328,7 @@ namespace HoneyBee.model
 
                 for (int i = 0; i < m_Meshes.Count; i++)
                 {
-                    writer.Write($"o { m_Meshes[i].Name }\n");
+                    writer.Write($"o { m_Meshes[i].Name }\n".ToCharArray());
 
                     for (int j = 0; j < m_Meshes[i].Vertices.Count; j += 3)
                     {
